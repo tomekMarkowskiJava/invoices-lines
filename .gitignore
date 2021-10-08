@@ -1,3 +1,6 @@
+src/main/resources/application.properties
+.gitignore
+
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar

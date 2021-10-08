@@ -10,7 +10,7 @@ import javax.validation.constraints.Size;
 import java.util.List;
 
 @Validated
-public interface ProjectRepository extends JpaRepository<Project, Long> {
+public interface ProjectRepo extends JpaRepository<Project, Long> {
     List<Project> findPRProjectsByDescriptionContaining(@Size(max=5)String description);
 
     @Query("SELECT p FROM Project p " +
