@@ -1,5 +1,4 @@
-src/main/resources/application.properties
-.gitignore
+
 
 HELP.md
 target/
@@ -169,3 +168,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+src/main/resources/application.properties
+.gitignore

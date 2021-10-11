@@ -1,4 +1,4 @@
-package com.vm.formularzwprowadzaniafaktur.repositories.birepository;
+package com.vm.formularzwprowadzaniafaktur.repository.birepository;
 
 import com.vm.formularzwprowadzaniafaktur.model.Budget;
 import org.springframework.data.jpa.repository.JpaRepository;

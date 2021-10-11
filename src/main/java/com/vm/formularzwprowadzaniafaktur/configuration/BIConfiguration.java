@@ -11,7 +11,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory",
-basePackages = "com.vm.formularzwprowadzaniafaktur.repositories.birepository")
+basePackages = "com.vm.formularzwprowadzaniafaktur.repository.birepository")
 public class BIConfiguration {
 
     @Primary
