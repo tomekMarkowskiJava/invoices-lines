@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Runner</title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <script type="text/javascript" src="http://erp-01/libs/head.load.min.js"></script>
+    <script type="text/javascript" src="http://erp-01/libs/jquery-3.2.1.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            var request_id='{10445D6C-7C86-44E7-9D15-DF2F0F23946D}';
+            var url='http://localhost:8080/FormularzWprowadzaniaFaktur/form/request?id='+request_id;
+            $.get(url, function(data){
+                $('#VMArea').append(data);
+                head.js('http://localhost:8080/form.js');
+            })
+        });
+    </script>
+
+</head>
+<body>
+<div id="VMArea"></div>
+
+</body>
+</html>
