@@ -13,14 +13,25 @@ head.js(
     'http://erp-01/libs/vm/jqGrid.js'
 );
 
-head.ready(function (){
-    $(document).ready(function (){
+head.ready(function () {
+    $(document).ready(function () {
         var lineGrid = $('#lineGrid')
-        var lines =[];
+        var lines = [];
+
+        //URL and requestId for ERP
+        // var url = 'http://erp-02/jetty/FormularzWprowadzaniaFaktur/api/'
+        // var id = $('#RequestID').val();
+        // var type = $('#FreeTextField_10).val();
+        //URL and requestId for localhost
+        var url = 'http://localhost:8080/api/'
+        var id = '{10445D6C-7C86-44E7-9D15-DF2F0F23946D}';
+        var type = 462;
+
+        saveInvoice(url,id,type);
 
         var testObject =
             {
-                id:1,
+                id: 1,
                 itemCode: '12345',
                 itemDescription: 'testowy towar',
                 project: '20-2000.20-20',
@@ -73,7 +84,22 @@ head.ready(function (){
                 caption: "Usuń",
                 buttonicon: "fa-minus",
                 onClickButton: function () {
-                    console.log('usun')
+                    var rowid = lineGrid.jqGrid('getGridParam', 'selrow')
+                    if (rowid != null) {
+                        var params = {
+                            lineId: rowid,
+                            requestId: id
+                        }
+                        $.ajax({
+                            url: url,
+                            type: 'DELETE',
+                            dataType: 'json',
+                            data: params
+                        })
+                        refreshGrid();
+                    } else {
+
+                    }
                 }.bind(this),
                 position: "first",
                 title: "Usuwa towar z listy",
@@ -100,3 +126,25 @@ head.ready(function (){
         })
     })
 })
+
+
+function saveInvoice(url,id, type) {
+    invoice = {
+        requestId: id,
+        type: type
+    }
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: JSON.stringify(invoice),
+        contentType: 'application/json; charset=utf-8',
+        success: function (data){
+            if (data == 0)
+                getRequestData(url,id);
+        },
+    })
+}
+
+function getRequestData(url, id) {
+    console.log('getting request data')
+}

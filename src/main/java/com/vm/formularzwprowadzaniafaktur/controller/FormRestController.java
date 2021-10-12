@@ -2,20 +2,18 @@ package com.vm.formularzwprowadzaniafaktur.controller;
 
 import com.vm.formularzwprowadzaniafaktur.FormService;
 import com.vm.formularzwprowadzaniafaktur.model.Budget;
+import com.vm.formularzwprowadzaniafaktur.model.Invoice;
 import com.vm.formularzwprowadzaniafaktur.model.ItemMU;
 import com.vm.formularzwprowadzaniafaktur.model.Project;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("FormularzWprowadzaniaFaktur/api")
+@RequestMapping("/api")
 public class FormRestController {
-    private FormService formService;
+    private final FormService formService;
 
     @Autowired
     public FormRestController(FormService formService) {
@@ -40,5 +38,18 @@ public class FormRestController {
     @GetMapping(value = "/form/")
     String getForm(){
         return "static/form.html";
+    }
+
+    @PostMapping(consumes = "application/json")
+    int addInvoice(@RequestBody Invoice invoice){
+        int id = formService.addInvoice(invoice);
+        return id;
+    }
+
+    @DeleteMapping
+    String deleteLine(@RequestParam("lineId")int lineId, @RequestParam("requestId") String requestid){
+        int invoiceId = formService.findInvoiceIdByRequestId(requestid);
+        formService.deleteInvoiceLine(invoiceId,lineId);
+        return "done";
     }
 }
