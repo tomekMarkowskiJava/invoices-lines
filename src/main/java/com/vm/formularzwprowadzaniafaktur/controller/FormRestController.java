@@ -1,10 +1,7 @@
 package com.vm.formularzwprowadzaniafaktur.controller;
 
 import com.vm.formularzwprowadzaniafaktur.FormService;
-import com.vm.formularzwprowadzaniafaktur.model.Budget;
-import com.vm.formularzwprowadzaniafaktur.model.Invoice;
-import com.vm.formularzwprowadzaniafaktur.model.ItemMU;
-import com.vm.formularzwprowadzaniafaktur.model.Project;
+import com.vm.formularzwprowadzaniafaktur.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +32,12 @@ public class FormRestController {
         return formService.findMu(projectNr,mpk);
     }
 
+    @GetMapping(value = "/invoice/{requestId}", produces = "application/json")
+    List<InvoiceLine> findInvoiceLines(@PathVariable String requestId){
+        int invoiceId = formService.findInvoiceIdByRequestId(requestId);
+        return formService.findInvoiceLines(invoiceId);
+    }
+
     @GetMapping(value = "/form/")
     String getForm(){
         return "static/form.html";
@@ -47,8 +50,8 @@ public class FormRestController {
     }
 
     @DeleteMapping
-    String deleteLine(@RequestParam("lineId")int lineId, @RequestParam("requestId") String requestid){
-        int invoiceId = formService.findInvoiceIdByRequestId(requestid);
+    String deleteLine(@RequestParam("lineId")int lineId, @RequestParam("requestId") String requestId){
+        int invoiceId = formService.findInvoiceIdByRequestId(requestId);
         formService.deleteInvoiceLine(invoiceId,lineId);
         return "done";
     }

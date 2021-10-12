@@ -4,11 +4,13 @@ import com.vm.formularzwprowadzaniafaktur.model.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.Size;
 import java.util.List;
 
+@Repository
 @Validated
 public interface ProjectRepo extends JpaRepository<Project, Long> {
     List<Project> findPRProjectsByDescriptionContaining(@Size(max=5)String description);

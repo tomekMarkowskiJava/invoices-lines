@@ -55,4 +55,8 @@ public class FormService {
     public int deleteInvoiceLine(int invoiceId, int lineId){
         return invoiceLineRepo.deleteByInvoiceIdAndLineId(invoiceId,lineId);
     }
+
+    public List<InvoiceLine> findInvoiceLines(int invoiceId) {
+        return invoiceLineRepo.findAllByInvoiceId(invoiceId);
+    }
 }
