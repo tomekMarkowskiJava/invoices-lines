@@ -9,16 +9,96 @@
     <table id="lineGrid"></table>
 </div>
 <div>
-    <table>
-        <tr>
-            <td>
-                <label>Projekt: </label>
-            </td>
-            <td>
-                <button id="chooseProject" type="button">Wybierz</button>
-            </td>
-        </tr>
-    </table>
+    <div id="dialogAdd" title="Dodaj towar" hidden style="position: center">
+        <div class="ui-widget-header ui-corner-top ui-jqgrid-titlebar ui-jqgrid-caption"
+             style="position: absolute; left: 0px; right: 0px; top: 0px; padding: 2px">
+            <span class="ui-jqgrid-title">Dodaj towar</span>
+            <button id="closeDialogAdd" type="button" class="exit" title="Zamknij">
+                x
+            </button>
+        </div>
+        <br><br>
+        <div class="exit"></div>
+        <table>
+            <tr>
+                <td>
+                    <label>Projekt: </label>
+                </td>
+                <td>
+                    <button class="buttons" id="chooseProject" type="button">Wybierz</button>
+                </td>
+                <td class="paddingRight">
+                    <span id="project" class="chosen"></span>
+                </td>
+                <td>
+                    <label>MPK: </label>
+                </td>
+                <td>
+                    <select id="mpkList"></select>
+                </td>
+            </tr>
+        </table>
+        <table id="itemsToBeAdded"></table>
+        <span class="alert" id="alertAddIdem"></span><br>
+        <textarea id="itemDescription" class="description" rows="1" maxlength="55" placeholder="Opis towaru"></textarea><br>
+        <table>
+            <tr>
+                <td>
+                    <label>Ilość ogółem:</label>
+                </td>
+                <td>
+                    <input type="text" id="itemQuantity" size="13"
+                           onkeypress="return (event.charCode !=8 && event.charCode ==0 || ( event.charCode == 44 ||event.charCode == 46 || (event.charCode >= 48 && event.charCode <= 57)))">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Cena netto:</label>
+                </td>
+                <td>
+                    <input type="text" id="towarCena" size="13"
+                           onkeypress="return (event.charCode !=8 && event.charCode ==0 || ( event.charCode == 44 || event.charCode == 46 || (event.charCode >= 48 && event.charCode <= 57)))">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>VAT:</label>
+                </td>
+                <td>
+                    <select id="wybierzVat">${vaty}</select>
+                </td>
+            </tr>
+        </table>
+        <br>
+        <div style="text-align: center">
+            <button class="buttons" id="addAccept" type="button">Dodaj</button>
+            <button class="buttons" id="addClose" type="button">Anuluj</button>
+        </div>
+    </div>
+    <div id="dialogProjects" title="Wybierz projekt" hidden>
+        <div class="ui-widget-header ui-corner-top ui-jqgrid-titlebar ui-jqgrid-caption" style="position: absolute;
+            left: 0px; right: 0px; top: 0px; padding: 2px">
+            <span class="ui-jqgrid-title">Wybierz projekt</span>
+            <button id="closeDialogProjects" type="button" class="exit" title="Zamknij">
+                x
+            </button>
+        </div>
+        <div>
+            <br><br>
+            <label>Projekt:</label>
+            <input type="text" id="inputFilterProjects" placeholder="Kod lub nazwa projektu">
+            <button class="przycisk" id="findProjects" type="button">Szukaj</button>
+            <br><br>
+            <table id="projects"></table>
+            <span class="alert" id="alertProjects"></span>
+            <div style="text-align: center">
+                <br>
+                <button class="buttons" id="projectsAccept" type="button">Ok</button>
+                <button class="buttons" id="projectsClose" type="button">Anuluj</button>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 </body>
 </html>

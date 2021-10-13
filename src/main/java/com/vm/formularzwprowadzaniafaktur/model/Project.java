@@ -14,6 +14,8 @@ import javax.persistence.Table;
 public class Project {
     @Id
     @Column(name = "[Kod projektu]")
+    String id;
+    @Column(name = "[Kod projektu]",insertable=false, updatable=false)
     String projectNr;
     @Column(name = "[Nazwa projektu]")
     String description;

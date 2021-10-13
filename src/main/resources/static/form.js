@@ -14,10 +14,20 @@ head.js(
 );
 
 
+
+
 head.ready(function () {
     $(document).ready(function () {
         var lines = [];
         var lineGrid = $('#lineGrid')
+        var projectGrid = $('#projects')
+        var itemGrid = $('#itemsToBeAdded')
+        var filter = '';
+
+        var chosenProject = {
+            projectNr: '',
+            description: ''
+        }
 
         //URL and requestId for ERP
         // var url = 'http://erp-02/jetty/FormularzWprowadzaniaFaktur/api/'
@@ -28,6 +38,16 @@ head.ready(function () {
         var url = 'http://localhost:8080/api/'
         var id = '{10445D6C-7C86-44E7-9D15-DF2F0F23946D}';
         var type = 462;
+
+        var dialogAdd  = $('#dialogAdd').dialog({
+            autoOpen: false,
+            width: 'auto'
+        })
+
+        var dialogProjects = $('#dialogProjects').dialog({
+            autoOpen: false,
+            width:'auto'
+        })
 
         saveInvoice(url,id,type);
 
@@ -98,7 +118,7 @@ head.ready(function () {
                             dataType: 'json',
                             data: params
                         })
-                        refreshGrid();
+                        refreshLineGrid();
                     } else {
 
                     }
@@ -119,7 +139,9 @@ head.ready(function () {
             caption: "Dodaj towar",
             buttonicon: "fa-plus",
             onClickButton: function () {
-                console.log("dodaj")
+                generateItemGrid();
+                disableButton();
+                dialogAdd.dialog('open');
             }.bind(this),
             position: "first",
             title: "Dodaje towar do zamówienia zakupu",
@@ -127,7 +149,85 @@ head.ready(function () {
 
         })
 
+        $('#chooseProject').button().click(function () {
+            filter = 'null';
+            var getUrl = url + 'project=' + filter;
+            $('#inputFilterProjects').val('')
+            dialogProjects.dialog('open')
 
+            projectGrid.jqGrid({
+                url: getUrl,
+                height: 'auto',
+                maxHeight: 230,
+                width: 'auto',
+                maxWidth: 600,
+                datatype: 'json',
+                rownumbers: true,
+                cmTemplate: {sortable: false, search: false},
+                mtype: 'GET',
+                search: true,
+                caption: 'Projekty',
+                colModel: [
+                    {name: 'projectNr', label: 'Kod projektu', width: 120},
+                    {name: 'description', label: 'Nazwa projektu', width: 250},
+                ]
+            })
+        })
+
+        $('#inputFilterProjects').keydown(function (e) {
+            var keyCode = e.keyCode ? e.keyCode : e.which;
+            if (keyCode == 13) {
+                e.stopPropagation()
+                $('#findProjects').trigger('click');
+            }
+        })
+
+        $('#findProjects').button().click(function () {
+            filter = $('#inputFilterProjects').val();
+            var getUrl = url + 'project=' + filter;
+            $('#alertProjekty').html('')
+            projectGrid.jqGrid('setGridParam', {url: getUrl});
+            projectGrid.trigger('reloadGrid');
+        })
+
+        $('#projectsAccept').button().click(function () {
+            var rowid = projectGrid.jqGrid('getGridParam', 'selrow');
+            if (rowid !== null) {
+                $('#alertProjects').html('')
+                chosenProject.projectNr = rowid;
+                chosenProject.description = projectGrid.jqGrid('getCell', rowid, 'description');
+                dialogProjects.dialog('close');
+                generateLinkToProjectCard();
+                refreshMPK(rowid, );
+            } else {
+                $('#alertProjects').html('Nie wybrano projektu')
+            }
+        })
+
+        $('#closeDialogProjects').button().click(function (){
+            dialogProjects.dialog('close')
+        })
+
+        $('#projectsClose').button().click(function (){
+            dialogProjects.dialog('close')
+        })
+
+        $('#closeDialogAdd').button().click(function () {
+            dialogAdd.dialog('close');
+        })
+
+        $('#addClose').button().click(function () {
+            dialogAdd.dialog('close');
+        })
+
+        $('#mpkList').select2({
+            sorter: data => data.sort((a, b) => a.text.localeCompare(b.text)),
+        });
+
+        $('#mpkList').change(function () {
+            disableButton();
+            refreshItemGrid();
+        });
 
         function saveInvoice(url,id, type) {
             invoice = {
@@ -153,14 +253,87 @@ head.ready(function () {
                 contentType: 'application/json; charset=utf-8',
                 success: function (data){
                     lines = data
-                    refreshGrid()
+                    refreshLineGrid()
                 },
             })
         }
 
-        function refreshGrid() {
+        function refreshLineGrid() {
             lineGrid.jqGrid('setGridParam', {data: lines});
             lineGrid.trigger('reloadGrid');
+        }
+
+        function generateItemGrid(){
+            var getUrl = 'mu/' + chosenProject.projectNr +'/' + $('#mpkList').val();
+            odswiezGridZTowarami(url);
+            gridTowaryDoDodania.jqGrid({
+                url: getUrl,
+                height: 'auto',
+                maxHeight: 230,
+                width: 'auto',
+                maxWidth: 600,
+                datatype: 'json',
+                rownumbers: true,
+                cmTemplate: {sortable: false, search: false},
+                mtype: 'GET',
+                search: true,
+                caption: 'Towary',
+                onCellSelect: function () {
+                    disableButton();
+                },
+                colModel: [
+                    {name: 'kod', label: 'Kod towaru', width: 150},
+                    {name: 'towar', label: 'Opis', width: 400},
+                ]
+            })
+        }
+
+        var refreshItemsList = function () {
+            getUrl = 'mu/' + chosenProject.projectNr +'/' + $('#mpkList').val();
+            itemGrid.jqGrid('setGridParam', {url: getUrl});
+            itemGrid.trigger('reloadGrid');
+            // if (editedLine !== null) {
+            //     setTimeout(function () {
+            //         itemGrid.jqGrid('setSelection', editedLineId, true);
+            //     }, 300)
+            // }
+            disableButton();
+        }
+
+        function generateLinkToProjectCard() {
+            $('#project').html('<a href="http://erp-02/synergy/docs/ProCard.aspx?Project=' + chosenProject.projectNr +
+                '" target="_blank" style="text-decoration: underline">'
+                + chosenProject.projectNr + '</a><br>' + chosenProject.description);
+        }
+        function disableButton () {
+            $('#addAccept').attr('disabled', true).css('opacity', '.35');
+        }
+
+        function refreshMPK(projectNr, mpk) {
+            var getUrl = url + 'mpk/' + projectNr
+            $.ajax({
+                type: "GET",
+                url: getUrl,
+                dataType: "json"
+            }).done(function (data, textStatus, xhr) {
+                var budgetElements = data[0].budgetElements;
+                var select = $('#mpkList');
+                select.empty();
+                $.each(budgetElements, function (key,value){
+                    var attr = '';
+                    var tempMpk = value.mpk.slice(0,-2)
+                    if (mpk==tempMpk)
+                        attr = 'selected'
+                    select.append(`<option value="${tempMpk}" ${attr}>${tempMpk}</option>`)
+                })
+
+
+                // $('#wybierzMPK').html(data);
+                // if (mpk !== null) {
+                //     $('#wybierzMPK').val(mpk).trigger('change');
+                // }
+                // odswiezGridZTowarami()
+            });
         }
     })
 })

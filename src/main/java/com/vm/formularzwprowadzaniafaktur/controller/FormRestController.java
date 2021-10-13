@@ -50,9 +50,8 @@ public class FormRestController {
     }
 
     @DeleteMapping
-    String deleteLine(@RequestParam("lineId")int lineId, @RequestParam("requestId") String requestId){
+    int deleteLine(@RequestParam("lineId")int lineId, @RequestParam("requestId") String requestId){
         int invoiceId = formService.findInvoiceIdByRequestId(requestId);
-        formService.deleteInvoiceLine(invoiceId,lineId);
-        return "done";
+        return formService.deleteInvoiceLine(invoiceId,lineId);
     }
 }
