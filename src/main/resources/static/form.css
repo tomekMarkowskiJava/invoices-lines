@@ -104,3 +104,8 @@ th.ui-th-column div {
     margin-left: auto;
     margin-right: auto;
 }
+
+body {
+    min-height: 100vh;
+    width: 100%;
+}

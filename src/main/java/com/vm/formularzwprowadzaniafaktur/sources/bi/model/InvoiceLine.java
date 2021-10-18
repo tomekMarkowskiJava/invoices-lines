@@ -1,18 +1,16 @@
-package com.vm.formularzwprowadzaniafaktur.model;
+package com.vm.formularzwprowadzaniafaktur.sources.bi.model;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Getter @Setter
 @Table(name = "`OF11/12, linia`", schema = "`Obieg faktur`")
 public class InvoiceLine {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "[Id faktury]")
@@ -59,4 +57,26 @@ public class InvoiceLine {
 
     @Column(name = "[Procent VAT]")
     private String taxPercent;
+
+    @Override
+    public String toString() {
+        return "InvoiceLine{" +
+                "id=" + id +
+                ", invoiceId=" + invoiceId +
+                ", lineId=" + lineId +
+                ", itemId=" + itemId +
+                ", itemCode='" + itemCode + '\'' +
+                ", description='" + description + '\'' +
+                ", mpk='" + mpk + '\'' +
+                ", project='" + project + '\'' +
+                ", projectName='" + projectName + '\'' +
+                ", projectCode='" + projectCode + '\'' +
+                ", quantity=" + quantity +
+                ", netAmount=" + netAmount +
+                ", tax='" + tax + '\'' +
+                ", grossAmount=" + grossAmount +
+                ", value=" + value +
+                ", taxPercent='" + taxPercent + '\'' +
+                '}';
+    }
 }

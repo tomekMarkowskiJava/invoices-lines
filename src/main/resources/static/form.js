@@ -10,46 +10,56 @@ head.js(
     'http://erp-01/libs/free-jqGrid-4.15.5/js/i18n/grid.locale-pl.js',
     'http://erp-01/libs/free-jqGrid-4.15.5/js/jquery.jqGrid.min.js',
     'http://erp-01/libs/jqGrid/plugins/grid.totals.js',
-    'http://erp-01/libs/vm/jqGrid.js'
+    'http://erp-01/libs/vm/jqGrid.js',
+    'http://erp-02/jetty/FormularzFaktur/formularz.css',
+    '/formularz.css'
 );
-
-
 
 
 head.ready(function () {
     $(document).ready(function () {
         var lines = [];
+        var taxes = [];
         var lineGrid = $('#lineGrid')
         var projectGrid = $('#projects')
         var itemGrid = $('#itemsToBeAdded')
         var filter = '';
+        var nextId = 0;
 
         var chosenProject = {
-            projectNr: '',
+            projectNr: '0',
             description: ''
         }
 
-        //URL and requestId for ERP
+        // //URL and requestId for ERP
         // var url = 'http://erp-02/jetty/FormularzWprowadzaniaFaktur/api/'
         // var id = $('#RequestID').val();
-        // var type = $('#FreeTextField_10).val();
+        // var type = $('#FreeTextField_10').val();
+        //
+        // $('#FreeTextField_10').hide();
 
         //URL and requestId for localhost
-        var url = 'http://localhost:8080/api/'
+        var url = 'http://localhost:8080/FormularzWprowadzaniaFaktur-0.0.1-SNAPSHOT/api/'
         var id = '{10445D6C-7C86-44E7-9D15-DF2F0F23946D}';
         var type = 462;
 
-        var dialogAdd  = $('#dialogAdd').dialog({
+        var dialogAdd = $('#dialogAdd').dialog({
             autoOpen: false,
             width: 'auto'
         })
 
         var dialogProjects = $('#dialogProjects').dialog({
             autoOpen: false,
-            width:'auto'
+            width: 'auto'
         })
 
-        saveInvoice(url,id,type);
+        var dialogLoading = $('#dialogLoading').dialog({
+            autoOpen: false,
+            width: 'auto'
+        })
+
+        saveInvoice(url, id, type);
+        getTaxes();
 
         // var testObject =
         //     {
@@ -75,7 +85,7 @@ head.ready(function () {
             rownumbers: true,
             pager: true,
             footerrow: true,
-            caption: 'Towary',
+            caption: 'Towary na fakturze',
             multiselect: false,
             colModel: [
                 {name: "itemCode", label: "Towar", width: 45},
@@ -109,16 +119,19 @@ head.ready(function () {
                     var rowid = lineGrid.jqGrid('getGridParam', 'selrow')
                     if (rowid != null) {
                         var params = {
-                            lineId: rowid,
+                            id: rowid,
                             requestId: id
                         }
                         $.ajax({
                             url: url,
                             type: 'DELETE',
                             dataType: 'json',
-                            data: params
+                            data: params,
+                            success: function (data) {
+                                lineGrid.jqGrid("delRowData", rowid);
+                                getRequestData();
+                            }
                         })
-                        refreshLineGrid();
                     } else {
 
                     }
@@ -196,19 +209,19 @@ head.ready(function () {
                 $('#alertProjects').html('')
                 chosenProject.projectNr = rowid;
                 chosenProject.description = projectGrid.jqGrid('getCell', rowid, 'description');
-                dialogProjects.dialog('close');
                 generateLinkToProjectCard();
-                refreshMPK(rowid, );
+                dialogLoading.dialog('open');
+                refreshMPK(rowid, null);
             } else {
                 $('#alertProjects').html('Nie wybrano projektu')
             }
         })
 
-        $('#closeDialogProjects').button().click(function (){
+        $('#closeDialogProjects').button().click(function () {
             dialogProjects.dialog('close')
         })
 
-        $('#projectsClose').button().click(function (){
+        $('#projectsClose').button().click(function () {
             dialogProjects.dialog('close')
         })
 
@@ -216,20 +229,105 @@ head.ready(function () {
             dialogAdd.dialog('close');
         })
 
+        $('#addAccept').button().click(function () {
+            $('#alertAddIdem').html('');
+            var rowid = itemGrid.jqGrid('getGridParam', 'selrow');
+            if (rowid === null) {
+                $('#alertAddIdem').html('Nie wybrano towaru');
+            } else if ($('#itemPrice').val().length < 1 || $('#itemQuantity').val().length < 1) {
+                $('#alertAddIdem').html('Nie wypełniono wszystkich pól');
+            } else {
+                dialogAdd.dialog('close');
+                var price = parseFloat($('#itemPrice').val());
+                var vat = $('#vatList').val();
+                var description;
+                if ($('#itemDescription').val()) {
+                    description = $('#itemDescription').val();
+                } else {
+                    description = itemGrid.jqGrid('getCell', rowid, 'description')
+                }
+                let item = {
+                    lineId: nextId,
+                    itemCode: itemGrid.jqGrid('getCell', rowid, 'itemCode'),
+                    description: description,
+                    mpk: $('#mpkList').val(),
+                    project: chosenProject.projectNr + ' ' + chosenProject.description,
+                    quantity: $('#itemQuantity').val(),
+                    netAmount: price.toFixed(2),
+                    tax: $('#vatList option:selected').text(),
+                    budzet: 0,
+                    grossAmount: null,
+                    value: null,
+                    taxPercent: null,
+                    projectName: chosenProject.description,
+                    projectCode: chosenProject.projectNr,
+                    itemId: rowid
+                }
+                var vat;
+                $.each(taxes, function (key, value) {
+                    if ($('#vatList option:selected').val() == value.id){
+                        vat = value.taxPercent;
+                        item.taxPercent = vat;
+                        return false;
+                    }
+                })
+                var grossAmount = parseFloat(Number(item.netAmount) + Number(item.netAmount * vat / 100));
+                item.grossAmount = grossAmount.toFixed(2)
+                item.value = (item.grossAmount * item.quantity).toFixed(2);
+                // if (edycjaTowaru) {
+                //     var edytowany = gridTowary.jqGrid('getGridParam', 'selrow');
+                //     item.id = edytowany
+                //     towary.forEach(function (item, index) {
+                //         if (edytowany == item.id) {
+                //             towary.splice(index, 1, item)
+                //             var parametry = {
+                //                 metoda: "edytujTowar",
+                //                 towar: JSON.stringify(item),
+                //                 idZamowienia: idZamowienia
+                //             }
+                //             $.post(poczatekUrl, parametry, function () {
+                //             })
+                //         }
+                //     })
+                // } else {
+                //     var parametry = {
+                //         metoda: "dodajTowar",
+                //         idZamowienia: idZamowienia,
+                //         towar: JSON.stringify(item)
+                //     }
+                //     $.post(poczatekUrl, parametry, function () {
+                //         idKolejnegoTowaru++;
+                //     })
+                // }
+                $.ajax({
+                    url: url + 'addline/' + id,
+                    type: 'POST',
+                    data: JSON.stringify(item),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        getRequestData();
+                        itemGrid.jqGrid('setSelection', item.id, true);
+                    },
+                })
+
+            }
+        })
+
         $('#addClose').button().click(function () {
             dialogAdd.dialog('close');
         })
 
         $('#mpkList').select2({
-            sorter: data => data.sort((a, b) => a.text.localeCompare(b.text)),
+            closeOnselect: true,
+            sorter: data => data.sort((a, b) => a.text.localeCompare(b.text))
         });
 
         $('#mpkList').change(function () {
             disableButton();
-            refreshItemGrid();
+            refreshItemsGrid();
         });
 
-        function saveInvoice(url,id, type) {
+        function saveInvoice(url, id, type) {
             invoice = {
                 requestId: id,
                 type: type
@@ -239,19 +337,37 @@ head.ready(function () {
                 type: 'POST',
                 data: JSON.stringify(invoice),
                 contentType: 'application/json; charset=utf-8',
-                success: function (data){
+                success: function (data) {
                     if (data == 0)
-                        getRequestData(url,id);
+                        getRequestData();
                 },
             })
         }
 
-        function getRequestData(url, id) {
+        function getTaxes() {
+            $.ajax({
+                url: url,
+                type: 'GET',
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    taxes = data;
+                    var select = $('#vatList');
+                    select.empty();
+                    $.each(taxes, function (key, value) {
+                        var tempId = value.id
+                        var tempDesc = tempId + ' - ' + value.description;
+                        select.append(`<option value="${tempId}">${tempDesc}</option>`)
+                    })
+                },
+            })
+        }
+
+        function getRequestData() {
             $.ajax({
                 url: url + 'invoice/' + id,
                 type: 'GET',
                 contentType: 'application/json; charset=utf-8',
-                success: function (data){
+                success: function (data) {
                     lines = data
                     refreshLineGrid()
                 },
@@ -263,10 +379,10 @@ head.ready(function () {
             lineGrid.trigger('reloadGrid');
         }
 
-        function generateItemGrid(){
-            var getUrl = 'mu/' + chosenProject.projectNr +'/' + $('#mpkList').val();
-            odswiezGridZTowarami(url);
-            gridTowaryDoDodania.jqGrid({
+        function generateItemGrid() {
+            var getUrl = url + 'mu/0/0';
+            // refreshItemsGrid(url);
+            itemGrid.jqGrid({
                 url: getUrl,
                 height: 'auto',
                 maxHeight: 230,
@@ -282,14 +398,14 @@ head.ready(function () {
                     disableButton();
                 },
                 colModel: [
-                    {name: 'kod', label: 'Kod towaru', width: 150},
-                    {name: 'towar', label: 'Opis', width: 400},
+                    {name: 'itemCode', label: 'Kod towaru', width: 150},
+                    {name: 'description', label: 'Opis', width: 400},
                 ]
             })
         }
 
-        var refreshItemsList = function () {
-            getUrl = 'mu/' + chosenProject.projectNr +'/' + $('#mpkList').val();
+        var refreshItemsGrid = function () {
+            var getUrl = url + 'mu/' + chosenProject.projectNr + '/' + $('#mpkList').val();
             itemGrid.jqGrid('setGridParam', {url: getUrl});
             itemGrid.trigger('reloadGrid');
             // if (editedLine !== null) {
@@ -305,8 +421,9 @@ head.ready(function () {
                 '" target="_blank" style="text-decoration: underline">'
                 + chosenProject.projectNr + '</a><br>' + chosenProject.description);
         }
-        function disableButton () {
-            $('#addAccept').attr('disabled', true).css('opacity', '.35');
+
+        function disableButton() {
+            // $('#addAccept').attr('disabled', true).css('opacity', '.35');
         }
 
         function refreshMPK(projectNr, mpk) {
@@ -319,20 +436,16 @@ head.ready(function () {
                 var budgetElements = data[0].budgetElements;
                 var select = $('#mpkList');
                 select.empty();
-                $.each(budgetElements, function (key,value){
+                $.each(budgetElements, function (key, value) {
                     var attr = '';
-                    var tempMpk = value.mpk.slice(0,-2)
-                    if (mpk==tempMpk)
+                    var tempMpk = value.mpk.slice(0, -2)
+                    if (mpk == tempMpk)
                         attr = 'selected'
                     select.append(`<option value="${tempMpk}" ${attr}>${tempMpk}</option>`)
                 })
-
-
-                // $('#wybierzMPK').html(data);
-                // if (mpk !== null) {
-                //     $('#wybierzMPK').val(mpk).trigger('change');
-                // }
-                // odswiezGridZTowarami()
+                dialogLoading.dialog('close');
+                dialogProjects.dialog('close');
+                select.trigger('change');
             });
         }
     })

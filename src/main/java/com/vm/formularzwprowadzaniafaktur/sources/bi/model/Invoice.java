@@ -1,4 +1,4 @@
-package com.vm.formularzwprowadzaniafaktur.model;
+package com.vm.formularzwprowadzaniafaktur.sources.bi.model;
 
 import lombok.Getter;
 import lombok.Setter;

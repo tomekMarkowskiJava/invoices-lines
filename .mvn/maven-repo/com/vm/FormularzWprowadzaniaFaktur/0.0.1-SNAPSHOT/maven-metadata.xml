@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata modelVersion="1.1.0">
+  <groupId>com.vm</groupId>
+  <artifactId>FormularzWprowadzaniaFaktur</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <timestamp>20211015.142424</timestamp>
+      <buildNumber>1</buildNumber>
+    </snapshot>
+    <lastUpdated>20211015142424</lastUpdated>
+    <snapshotVersions>
+      <snapshotVersion>
+        <extension>war</extension>
+        <value>0.0.1-20211015.142424-1</value>
+        <updated>20211015142424</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <extension>pom</extension>
+        <value>0.0.1-20211015.142424-1</value>
+        <updated>20211015142424</updated>
+      </snapshotVersion>
+    </snapshotVersions>
+  </versioning>
+</metadata>

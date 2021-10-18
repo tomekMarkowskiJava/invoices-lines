@@ -1,15 +1,10 @@
-package com.vm.formularzwprowadzaniafaktur.model;
+package com.vm.formularzwprowadzaniafaktur.sources.bi.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.Set;
 
 @Entity

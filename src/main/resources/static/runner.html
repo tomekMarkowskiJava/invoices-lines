@@ -11,10 +11,10 @@
     <script>
         $(document).ready(function(){
             var request_id='{10445D6C-7C86-44E7-9D15-DF2F0F23946D}';
-            var url='http://localhost:8080/form/request?id='+request_id;
+            var url='http://localhost:8080/FormularzWprowadzaniaFaktur-0.0.1-SNAPSHOT/form/request?id='+request_id;
             $.get(url, function(data){
                 $('#VMArea').append(data);
-                head.js('http://localhost:8080/form.js');
+                head.js('http://localhost:8080/FormularzWprowadzaniaFaktur-0.0.1-SNAPSHOT/form.js');
             })
         });
     </script>
